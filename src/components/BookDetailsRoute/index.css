@@ -1,0 +1,60 @@
+.detailsRoute-container {
+  background-color: grey;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.details-book {
+  display: flex;
+}
+.details-route {
+  padding: 40px;
+  border-radius: 10px;
+  align-items: center;
+  width: 50%;
+  background-color: #fff;
+}
+
+.hr {
+  border: 1px solid red;
+}
+.about-author {
+  font-size: 15px;
+  font-weight: bold;
+}
+.about-pera {
+  font-size: 10px;
+}
+.book-image {
+  height: 160px;
+  width: 45%;
+}
+.books-heading {
+  font-size: 20px;
+  font-weight: bold;
+}
+.books-pera {
+  font-size: 15px;
+}
+.rating {
+  font-size: 15px;
+}
+.status {
+  font-size: 15px;
+}
+.spanEl {
+  color: blue;
+}
+.description {
+  margin: 10px;
+}
+@media screen and (max-width: 576px) {
+  .details-route {
+    width: 90%;
+  }
+  .books-heading {
+    font-size: 15px;
+  }
+}

@@ -1,0 +1,21 @@
+.book-image {
+  width: 200px;
+}
+.container1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px;
+}
+.books-container {
+  display: flex;
+  margin-left: 15px;
+}
+.book-details {
+  width: 155px;
+  height: 120px;
+  margin-left: 10px;
+}
+.books-heading {
+  font-size: 16px;
+}

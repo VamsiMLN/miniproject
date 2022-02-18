@@ -1,6 +1,10 @@
-import {Route} from 'react-router-dom'
+import {Route, Redirect, Switch} from 'react-router-dom'
 import Login from './components/Login'
 import Home from './components/Home'
+import BookShelves from './components/BookShelves/index'
+import BookDetailsRoute from './components/BookDetailsRoute'
+import NotFound from './components/NotFound'
+import ProtectedRoute from './components/ProtectedRoute'
 
 import './App.css'
 
@@ -31,8 +35,14 @@ import './App.css'
 
 const App = () => (
   <>
-    <Route exact path="/login" component={Login} />
-    <Route exact path="/" component={Home} />
+    <Switch>
+      <Route exact path="/login" component={Login} />
+      <ProtectedRoute exact path="/" component={Home} />
+      <ProtectedRoute exact path="/books" component={BookShelves} />
+      <ProtectedRoute exact path="/bookdetails" component={BookDetailsRoute} />
+      <Route path="/not-found" component={NotFound} />
+      <Redirect to="not-found" />
+    </Switch>
   </>
 )
 

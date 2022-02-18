@@ -101,17 +101,20 @@ class LoginForm extends Component {
             <img
               src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644683415/miniproject/mobile_view_vhsok1.jpg"
               className="image1"
-              alt="website logo"
+              alt="website l"
             />
             <img
-              alt=""
+              alt="website login"
               className="altimage"
               src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644742059/miniproject/Rectangle_1467_fizzqv.jpg"
             />
           </div>
           <div className="form">
             <form className="form-container" onSubmit={this.submitForm}>
-              <img src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644756086/miniproject/Group_7732_1_w8t4xh.jpg" />
+              <img
+                alt="login website logo"
+                src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644756086/miniproject/Group_7732_1_w8t4xh.jpg"
+              />
 
               <div className="input-container">
                 {this.renderUsernameField()}

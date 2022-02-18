@@ -1,0 +1,37 @@
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.notfound-image {
+  margin-top: 20px;
+}
+.notfound-heading {
+  font-size: 26px;
+  font-weight: bold;
+  margin-top: 10px;
+
+  color: #334155;
+}
+.notfound-pera {
+  font-size: 15px;
+
+  color: #475569;
+}
+.button1 {
+  font-size: 15px;
+  margin-top: 5px;
+  width: 130px;
+  background-color: blue;
+  color: #fff;
+  height: 40px;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+}
+@media screen and (max-width: 576px) {
+  .not-found-container {
+    padding: 25px;
+  }
+}
