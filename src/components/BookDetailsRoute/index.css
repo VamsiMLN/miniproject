@@ -5,6 +5,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 .details-book {
   display: flex;
@@ -15,6 +16,11 @@
   align-items: center;
   width: 50%;
   background-color: #fff;
+}
+@media screen and (max-width: 450px) {
+  .details-route {
+    margin-top: 55px;
+  }
 }
 
 .hr {
@@ -57,4 +63,14 @@
   .books-heading {
     font-size: 15px;
   }
+}
+.footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+}
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

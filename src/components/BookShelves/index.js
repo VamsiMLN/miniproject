@@ -1,12 +1,12 @@
 import {Component} from 'react'
+import Loader from 'react-loader-spinner'
 import {BsSearch} from 'react-icons/bs'
 import Cookies from 'js-cookie'
-import Loader from 'react-loader-spinner'
-import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
-import Book from '../Book'
-import FilterGroup from '../FilterGroup'
 import Header from '../Header'
-
+import Footer from '../Footer'
+import LeftNavBar from '../LeftNavBar'
+import Book from '../Book'
+import FailureView from '../FailureView'
 import './index.css'
 
 const bookshelvesList = [
@@ -32,184 +32,231 @@ const bookshelvesList = [
   },
 ]
 
-const apiStatusConstants = {
-  initial: 'INITIAL',
-  success: 'SUCCESS',
-  failure: 'FAILURE',
-  inProgress: 'IN_PROGRESS',
+const apiStatusConstant = {
+  initial: 'initial',
+  inProgress: 'inProgress',
+  success: 'success',
+  failure: 'failure',
+  noBooks: 'noBooks',
 }
 
-class BookShelves extends Component {
+class Bookshelves extends Component {
   state = {
+    apiStatus: apiStatusConstant.initial,
     booksList: [],
-    apiStatus: apiStatusConstants.initial,
-    searchInput: '',
-    bookshelves: [],
+    bookshelfName: bookshelvesList[0].value,
+    label: bookshelvesList[0].label,
+    searchText: '',
+    activeStatusId: bookshelvesList[0].id,
   }
 
   componentDidMount() {
-    this.getbooksList()
+    this.getBookList()
   }
 
-  getbooksList = async () => {
-    this.setState({apiStatus: apiStatusConstants.inProgress})
-    const {bookshelves, searchInput} = this.state
-    const apiUrl = `https://apis.ccbp.in/book-hub/books?shelf=${bookshelves.join()}&search=${searchInput}`
+  getBookList = async () => {
+    this.setState({
+      apiStatus: apiStatusConstant.inProgress,
+    })
+    const {bookshelfName, searchText} = this.state
     const jwtToken = Cookies.get('jwt_token')
 
+    const apiUrl = `https://apis.ccbp.in/book-hub/books?shelf=${bookshelfName}&search=${searchText}`
     const options = {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${jwtToken}`,
       },
-      method: 'GET',
     }
     const response = await fetch(apiUrl, options)
-    if (response.ok === true) {
-      const data = await response.json()
+    const data = await response.json()
 
-      const updatedData = data.books.map(eachBook => ({
-        authorName: eachBook.author_name,
-        coverPic: eachBook.cover_pic,
-        id: eachBook.id,
-        status: eachBook.status,
-        title: eachBook.title,
-        rating: eachBook.rating,
-        readStatus: eachBook.read_status,
+    if (response.ok) {
+      const updatedData = data.books.map(eachItem => ({
+        authorName: eachItem.author_name,
+        coverPic: eachItem.cover_pic,
+        id: eachItem.id,
+        title: eachItem.title,
+        rating: eachItem.rating,
+        readStatus: eachItem.read_status,
       }))
       this.setState({
         booksList: updatedData,
-        apiStatus: apiStatusConstants.success,
+        apiStatus: apiStatusConstant.success,
       })
     } else {
       this.setState({
-        apiStatus: apiStatusConstants.failure,
+        apiStatus: apiStatusConstant.failure,
       })
     }
   }
 
-  changeSearchInput = event => {
-    this.setState({searchInput: event.target.value})
+  onChangeSearchText = event => {
+    this.setState({
+      searchText: event.target.value,
+    })
   }
 
-  onEnterSearchInput = event => {
+  onKeyDown = event => {
     if (event.key === 'Enter') {
-      this.getbooksList()
+      this.getBookList()
     }
   }
 
-  renderBooksList = () => {
-    const {booksList, searchInput, bookshelves} = this.state
-    console.log(bookshelves)
-    const renderBooksList = booksList.length > 0
-    const searchResult = booksList.filter(each =>
-      each.title.includes(searchInput),
-    )
+  onClickSearchText = () => this.getBookList()
 
-    return renderBooksList ? (
-      <div className="book-list-container">
-        <div className="sidebar">
-          <h1 className="booksheves-heading">Bookshelves</h1>
-          <h3 className="all-heading">All</h3>
-          <h3 className="all-heading">Read</h3>
-          <h3 className="all-heading">Curretly Reading</h3>
-          <h3 className="all-heading">Want to Read</h3>
-        </div>
-        <div>
-          <div className="search">
-            <h1 className="read-books">Read Books</h1>
-            <div className="search-input-container-desktop">
-              <input
-                type="search"
-                className="search-input-desktop"
-                placeholder="Search"
-                onChange={this.changeSearchInput}
-                onKeyDown={this.onEnterSearchInput}
-              />
-              <button
-                type="button"
-                testid="searchButton"
-                className="search-button-container-desktop"
-                onClick={this.getJobs}
-              >
-                <BsSearch className="search-icon-desktop" />
-              </button>
-            </div>
-          </div>
-          <ul className="un-order">
-            {searchResult.map(book => (
-              <Book bookDetails={book} key={book.id} />
+  onClickTryAgin = () => {
+    const {searchText} = this.state
+    this.getBookList()
+    console.log(searchText)
+  }
+
+  renderBookShelvesLeftNavbar = () => {
+    const {activeStatusId} = this.state
+    return (
+      <div className="bookshelves-left-navbar">
+        <h1 className="left-navbar-heading">Bookshelves</h1>
+        <ul className="list-container-of-bookshelves-options">
+          {bookshelvesList.map(eachItem => (
+            <LeftNavBar
+              filterBookDetails={eachItem}
+              isActive={eachItem.id === activeStatusId}
+              key={eachItem.id}
+              getFilterBookDetails={this.getFilterBookDetails}
+            />
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  getFilterBookDetails = (value, label, id) => {
+    this.setState(
+      {
+        bookshelfName: value,
+        label,
+        activeStatusId: id,
+      },
+      this.getBookList,
+    )
+  }
+
+  renderSearchContainer = () => {
+    const {searchText} = this.state
+    return (
+      <div className="search-icon-and-input-container">
+        <input
+          type="search"
+          placeholder="Search"
+          className="search-input"
+          value={searchText}
+          onKeyDown={this.onKeyDown}
+          onChange={this.onChangeSearchText}
+        />
+        <button
+          testid="searchButton"
+          type="button"
+          className="search-icon-container"
+          value={searchText}
+          onClick={this.onClickSearchText}
+        >
+          <BsSearch className="search-icon" />
+        </button>
+      </div>
+    )
+  }
+
+  renderBookList = () => {
+    const {booksList} = this.state
+
+    return (
+      <>
+        {booksList.length === 0 ? (
+          this.renderNoBooksDisplay()
+        ) : (
+          <ul className="bookshelves-show-container">
+            {booksList.map(eachItem => (
+              <Book bookListDetails={eachItem} key={eachItem.id} />
             ))}
           </ul>
-        </div>
-      </div>
-    ) : (
-      <div>
-        <img src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1645071836/miniproject/Asset_1_1_qevmga.png" />
-        <p>Your search for dsadsdsad did not find any matches.</p>
-      </div>
+        )}
+      </>
     )
   }
 
   renderFailureView = () => (
-    <div className="failure-container">
-      <img
-        className="failure-image"
-        src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1645074376/miniproject/Group_7522_desk_sigup6.png"
-      />
-      <p className="failure-pera">Something went wrong, Please try again.</p>
-      <button type="button" className="failure-btn">
-        Try Again
-      </button>
+    <div className="bookshelves-failure-view-container">
+      <FailureView onClickTryAgin={this.onClickTryAgin} />
     </div>
   )
 
-  renderLoadingView = () => (
-    <div className="loader-container" testid="loader">
-      <Loader type="TailSpin" color="#00BFFF" height="50" width="50" />
+  renderNoBooksDisplay = () => {
+    const {searchText} = this.state
+    return (
+      <div className="no-books-container">
+        <img
+          src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1645071836/miniproject/Asset_1_1_qevmga.png"
+          alt="no books"
+          className="no-books-image"
+        />
+        <p className="pera">
+          Your search for {searchText} did not find any matches.
+        </p>
+      </div>
+    )
+  }
+
+  renderLoader = () => (
+    <div testid="loader" className="loader">
+      <Loader type="Oval" color="#0b69ff" height="50" width="50" />
     </div>
   )
 
-  renderAllBooks = () => {
+  renderView = () => {
     const {apiStatus} = this.state
+
     switch (apiStatus) {
-      case apiStatusConstants.success:
-        return this.renderBooksList()
-      case apiStatusConstants.failure:
+      case apiStatusConstant.success:
+        return this.renderBookList()
+      case apiStatusConstant.inProgress:
+        return this.renderLoader()
+      case apiStatusConstant.failure:
         return this.renderFailureView()
-      case apiStatusConstants.inProgress:
-        return this.renderLoadingView()
       default:
         return null
     }
   }
 
-  changeBookshelves = label => {
-    this.setState(
-      prev => ({bookshelves: [...prev.bookshelves, label]}),
-      this.getbooksList,
-    )
-  }
-
   render() {
-    const {searchInput} = this.state
+    const {label} = this.state
     return (
       <>
         <Header />
-        <div>
-          <div>
-            <FilterGroup
-              bookshelvesList={bookshelvesList}
-              searchInput={searchInput}
-              changeSearchInput={this.changeSearchInput}
-              bookList={this.getbooksList}
-              changeBookshelves={this.changeBookshelves}
-            />
+        <div id="bookshelves-main-container">
+          <div id="bookshelves-sub-container">
+            <div className="mobile-search-input-container">
+              {this.renderSearchContainer()}
+            </div>
+            <div id="bookshelves-left-navbar">
+              {this.renderBookShelvesLeftNavbar()}
+            </div>
+            <div id="render-book-list-container">
+              <div id="search-container">
+                <h1 className="search-container-heading">{label} Books</h1>
+                {this.renderSearchContainer()}
+              </div>
+              <div id="show-books-container">
+                {this.renderView()}
+                <div className="footer-list">
+                  <Footer />
+                </div>
+              </div>
+            </div>
           </div>
-
-          {this.renderAllBooks()}
         </div>
       </>
     )
   }
 }
-export default BookShelves
+
+export default Bookshelves

@@ -1,18 +1,40 @@
 import {Component} from 'react'
 import {Redirect} from 'react-router-dom'
 import Cookies from 'js-cookie'
-
 import './index.css'
 
-class LoginForm extends Component {
-  state = {
-    username: '',
-    password: '',
-    showSubmitError: false,
-    errorMsg: '',
+class Login extends Component {
+  state = {username: '', password: '', showErrorMessage: false, errorMsg: ''}
+
+  onSuccessLogin = jwtToken => {
+    Cookies.set('jwt_token', jwtToken, {expires: 30})
+    const {history} = this.props
+    history.push('/')
   }
 
-  onChangeUsername = event => {
+  onFailureLogin = errorMsg => {
+    this.setState({showErrorMessage: true, errorMsg})
+  }
+
+  onSubmitForm = async event => {
+    event.preventDefault()
+    const {username, password} = this.state
+    const userDetails = {username, password}
+    const api = 'https://apis.ccbp.in/login'
+    const options = {
+      method: 'POST',
+      body: JSON.stringify(userDetails),
+    }
+    const response = await fetch(api, options)
+    const data = await response.json()
+    if (response.ok === true) {
+      this.onSuccessLogin(data.jwt_token)
+    } else {
+      this.onFailureLogin(data.error_msg)
+    }
+  }
+
+  onChangeUserName = event => {
     this.setState({username: event.target.value})
   }
 
@@ -20,32 +42,21 @@ class LoginForm extends Component {
     this.setState({password: event.target.value})
   }
 
-  onSubmitSuccess = jwtToken => {
-    const {history} = this.props
-    Cookies.set('jwt_token', jwtToken, {
-      expires: 30,
-    })
-    history.replace('/')
-  }
-
-  onSubmitFailure = errorMsg => {
-    this.setState({showSubmitError: true, errorMsg})
-  }
-
   renderUsernameField = () => {
     const {username} = this.state
+
     return (
       <>
         <label className="input-label" htmlFor="username">
           Username*
         </label>
         <input
-          type="text"
+          placeholder="username"
           id="username"
-          className="username-input-field"
           value={username}
-          onChange={this.onChangeUsername}
-          placeholder="Username"
+          className="username-input-filed"
+          type="text"
+          onChange={this.onChangeUserName}
         />
       </>
     )
@@ -59,79 +70,49 @@ class LoginForm extends Component {
           Password*
         </label>
         <input
-          type="password"
+          placeholder="password"
           id="password"
-          className="password-input-field"
           value={password}
+          className="username-input-filed"
+          type="password"
           onChange={this.onChangePassword}
-          placeholder="Password"
         />
       </>
     )
   }
 
-  submitForm = async event => {
-    event.preventDefault()
-    const {username, password} = this.state
-    const userDetails = {username, password}
-    const apiUrl = 'https://apis.ccbp.in/login'
-    const options = {
-      method: 'POST',
-      body: JSON.stringify(userDetails),
-    }
-    const response = await fetch(apiUrl, options)
-    const data = await response.json()
-    if (response.ok === true) {
-      this.onSubmitSuccess(data.jwt_token)
-    } else {
-      this.onSubmitFailure(data.error_msg)
-    }
-  }
-
   render() {
-    const {showSubmitError, errorMsg} = this.state
-    const token = Cookies.get('jwt_token')
-    if (token !== undefined) {
+    const {showErrorMessage, errorMsg} = this.state
+    const jwtToken = Cookies.get('jwt_token')
+    if (jwtToken !== undefined) {
       return <Redirect to="/" />
     }
     return (
       <div className="login-form-container">
-        <div className="main-container">
-          <div className="image-container">
-            <img
-              src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644683415/miniproject/mobile_view_vhsok1.jpg"
-              className="image1"
-              alt="website l"
-            />
-            <img
-              alt="website login"
-              className="altimage"
-              src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644742059/miniproject/Rectangle_1467_fizzqv.jpg"
-            />
-          </div>
-          <div className="form">
-            <form className="form-container" onSubmit={this.submitForm}>
-              <img
-                alt="login website logo"
-                src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644756086/miniproject/Group_7732_1_w8t4xh.jpg"
-              />
-
-              <div className="input-container">
-                {this.renderUsernameField()}
-              </div>
-              <div className="input-container">
-                {this.renderPasswordField()}
-              </div>
-              <button type="submit" className="login-button">
-                Login
-              </button>
-              {showSubmitError && <p className="error-message">* {errorMsg}</p>}
-            </form>
-          </div>
-        </div>
+        <img
+          alt="login website logo"
+          className="login-mobile-img"
+          src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644683415/miniproject/mobile_view_vhsok1.jpg"
+        />
+        <img
+          alt="website login"
+          className="login-image"
+          src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644742059/miniproject/Rectangle_1467_fizzqv.jpg"
+        />
+        <form className="form-container" onSubmit={this.onSubmitForm}>
+          <img
+            alt="website-logo"
+            src="https://res.cloudinary.com/djdh5bkl5/image/upload/v1644756086/miniproject/Group_7732_1_w8t4xh.jpg"
+          />
+          <div className="input-container">{this.renderUsernameField()}</div>
+          <div className="input-container">{this.renderPasswordField()}</div>
+          <button className="login-button" type="submit">
+            LogIn
+          </button>
+          {showErrorMessage && <p className="error-message">{errorMsg}</p>}
+        </form>
       </div>
     )
   }
 }
-
-export default LoginForm
+export default Login
